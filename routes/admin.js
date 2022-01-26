@@ -3,6 +3,9 @@ const router = express.Router()
 const mongoose = require("mongoose")
 require("../models/Categoria")
 const Categoria = mongoose.model("categorias")
+
+require('../models/Postagem')
+const Postagem = mongoose.model("postagens")
 //rotas
 router.use(express.json())
 
@@ -94,6 +97,40 @@ router.delete("/categorias/edit/:id", (req, res) => {
     }).catch((err) => {
         return res.status(400).json({ message: 'categoria não encontrada' });
     })
+})
+
+router.post("/addpostagem", (req, res) => {
+    console.log('rotina de add postagem')
+    var erros = []
+    // incluir validacao dos campos
+    if (req.body.categoria == "0") {
+        erros.push({ message: "Categoria invalida, registre uma categoria" })
+        return res.status(400).json({ message: 'categoria invalida' });
+    }
+    if (erros.length > 0) {
+        return res.status(400).json(erros);
+    }
+    const novaPostagem = {
+        titulo: req.body.titulo,
+        descricao: req.body.descricao,
+        conteudo: req.body.conteudo,
+        categoria: req.body.categoria,
+        slug: req.body.slug
+    }
+    const retorPostagem = {
+        titulo: req.body.titulo,
+        slug: req.body.slug,
+        descricao: req.body.descricao,
+        conteudo: req.body.conteudo
+    }
+
+    new Postagem(novaPostagem).save().then(() => {
+        res.json(retorPostagem)
+    }).catch((err) => {
+        console.log('erro ao salvar a postagem ' + err)
+        return res.status(400).json({ message: 'erro ao salvar' });
+    })
+
 })
 
 module.exports = router
